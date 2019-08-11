@@ -12,23 +12,23 @@ class Client:
         if api_key is None:
             raise MissingRequiredArgument('Missing client api_key')
 
-        self.api_key = api_key
+        self.__api_key = api_key
         self.url = 'https://www.hikingproject.com/data/'
         self.call_type = None
         self.params = {
-            'key': self.api_key,
+            'key': self.__api_key,
             'maxResults': 10,
             'maxDistance': 10,
             'minLength': 0,
             'minStars': 0}
 
-    def send_request(self, call_type, custom_params):
+    def __send_request(self, call_type, custom_params):
         custom_params.update(self.params)
         return requests.get(self.url + call_type, params=custom_params)
 
-    def get_response(self, custom_params: dict = None):
+    def __get_response(self, custom_params: dict = None):
         call_type = inspect.stack()[1].function.replace('_', '-')
-        response = self.send_request(call_type, custom_params)
+        response = self.__send_request(call_type, custom_params)
         if not response.ok:
             raise InvalidResponseException(
                 f'Error calling {self.url + call_type}, '
@@ -56,7 +56,7 @@ class Client:
             error_message = f'Lattitude and longitude are required ' \
                             'but received - lat: {lat}, lon: {lon}'
             raise MissingRequiredArgument(error_message)
-        return [Trail(x) for x in self.get_response(custom_params=custom_params)]
+        return [Trail(x) for x in self.__get_response(custom_params=custom_params)]
 
     def get_trail_by_id(self, id):
         """Returns a Trail object"""
