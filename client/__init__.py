@@ -4,7 +4,7 @@ from exceptions import (
     MissingRequiredArgument,
     InvalidResponseException,
     ResponseFailureException)
-from trail import Trail
+from helpers.trail import Trail
 
 
 class Client:
