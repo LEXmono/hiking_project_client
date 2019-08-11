@@ -39,18 +39,38 @@ class Client:
                 'Data: {response.json()}')
         return response.json().get('trails')
 
-    # Update Helpers
-    def set_sort(self, new_value: str = None):
+    # Methods to help update things inside of the client. 
+    def set_sort_type(self, new_value: str = None):
+        """Set the sorting type for trails
+        Args:
+            new_value (str): How would you like to sort the data?
+        """
         sort_values = ['quality', 'distance']
         if new_value is None or new_value.lower() not in sort_values:
             raise ValueError(
                 f'Missing or invalid sort value. '
-                'Should be one of: {sort_values}')
-        self.params['sort'] = new_value
+                f'Should be one of: {sort_values}')
+        self.params['sort'] = new_value.lower()
+    
+    def set_max_results(self, new_value: str = None):
+        """Set the maximum number of results to return from Hiking Project
+        Args:
+            new_value (int): How many trails to get back from Hiking Projects?
+        """
+        if new_value is None or int(new_value) <= 0:
+            raise ValueError(
+                f'Missing or invalid value. Must be a number > 0')
+        self.params['maxResults'] = new_value
 
     # API Methods as defined by https://www.hikingproject.com/data
     def get_trails(self, lat: str = None, lon: str = None):
-        """Returns a list of Trail objects"""
+        """Returns a list of Trail objeects
+        Args:
+            lat (str): Lattitude to search for.
+            lon (str): Longitude to search for.
+        Returns:
+            trails (list): List of Trail objects
+        """
         custom_params = {'lat': lat, 'lon': lon}
         if None in (lat, lon):
             error_message = f'Lattitude and longitude are required ' \
@@ -59,14 +79,26 @@ class Client:
         return [Trail(x) for x in self.__get_response(custom_params=custom_params)]
 
     def get_trail_by_id(self, id):
-        """Returns a Trail object"""
+        """Returns a single Trail objeect
+        Args:
+            id (str): Hiking Project trail id.
+        Returns:
+            trail (Trail): Single Trail object
+        """
+        if not id:
+            raise MissingRequiredArgument(f'Required field id is missing.')
         return self.get_trails_by_id(ids=id)[0]
 
     def get_trails_by_id(self, ids=None):
-        """Returns a list of Trail objects"""
+        """Returns a list of Trail objeects
+        Args:
+            ids (list, str): list or comma separated str of Hiking Project trail ids.
+        Returns:
+            trails (list): list of Trail objects
+        """
         if ids is None:
             raise MissingRequiredArgument(f'Required field ids is missing.')
         if type(ids) == list:
-            input_data = ','.join(ids)
-        custom_params = {'ids': input_data}
-        return [Trail(x) for x in self.get_response(custom_params=custom_params)]
+            ids = ','.join(ids)
+        custom_params = {'ids': ids}
+        return [Trail(x) for x in self.__get_response(custom_params=custom_params)]
